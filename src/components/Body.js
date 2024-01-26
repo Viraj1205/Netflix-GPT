@@ -1,13 +1,9 @@
+import { createBrowserRouter } from "react-router-dom";
 import Login from "./Login";
 import Browse from "./Browse";
-import { RouterProvider, createBrowserRouter,} from "react-router-dom";
- import "../MovieList.css"
-import MovieDescription from "./MovieDescription";
-
+import { RouterProvider } from "react-router-dom";
 
 const Body = () => {
-  
- 
   const appRouter = createBrowserRouter([
     {
       path: "/",
@@ -16,21 +12,10 @@ const Body = () => {
     {
       path: "/browse",
       element: <Browse />,
-      children: [
-        {
-          path: "/browse/:movieTitle",
-          element: <MovieDescription/>
-        }
-      ]
     },
-    
   ]);
 
-  return (
-    <div  className="w-screen">
-      <RouterProvider router={appRouter}></RouterProvider>
-    </div>
-  );
+  return <RouterProvider router={appRouter} />;
 };
 
 export default Body;

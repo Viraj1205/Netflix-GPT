@@ -1,50 +1,36 @@
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Header from "./Header";
-import { checkValidData } from "../utils/validate";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { BACKGROUND_IMG_URL } from "../utils/constants";
+import { validateData } from "../utils/validate";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { auth } from "../utils/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { updateProfile } from "firebase/auth";
+
+import Fotter from "./Fotter";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
-import { BG_URL } from "../utils/constants";
-
 const Login = () => {
-  const [isSignInForm, setIsSignInForm] = useState(true);
-  const [erroMessage, setErrorMessage] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const name = useRef(null);
-  const email = useRef(null);
-  const password = useRef(null);
-  const confirmPassword = useRef(null);
   const dispatch = useDispatch();
 
-  const signInHandler = () => {
-    setErrorMessage(null);
-    setIsSignInForm(!isSignInForm);
-  };
+  const [isSignInForm, setIsSignInForm] = useState(true);
+  const [alertMessage, setAlertMessage] = useState(null);
+  const email = useRef(null);
+  const password = useRef(null);
+  const name = useRef(null);
 
-  const showPasswordHandler = () => {
-    setShowPassword(!showPassword);
-  };
-  const showConfirmPasswordHandler = () => {
-    setShowConfirmPassword(!showConfirmPassword);
-  };
+  const handleClickValidation = () => {
+    const message = validateData(
+      email.current?.value,
+      password.current?.value,
+      name.current?.value
+    );
+    setAlertMessage(message);
 
-  const handleButtonClick = (event) => {
-    event.preventDefault();
-
-    const message = checkValidData(email.current.value, password.current.value);
-    setErrorMessage(message);
     if (message) return;
-    if(!isSignInForm){
-      if (password.current.value !== confirmPassword.current.value) {
-        setErrorMessage("Password does not match");
-        return;
-      }
-     }
+
     if (!isSignInForm) {
       createUserWithEmailAndPassword(
         auth,
@@ -57,21 +43,24 @@ const Login = () => {
             displayName: name.current.value,
           })
             .then(() => {
-              // Profile updated!
-              const { uid, email, displayName } = auth.currentUser;
+              const { uid, email, displayName, photoURL } = auth.currentUser;
               dispatch(
-                addUser({ uid: uid, email: email, displayName: displayName })
+                addUser({
+                  uid: uid,
+                  email: email,
+                  displayName: displayName,
+                  photoURL: photoURL,
+                })
               );
             })
             .catch((error) => {
-              // An error occurred
-              setErrorMessage(error.message);
+              setAlertMessage(error.message);
             });
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
-          // ..
+          setAlertMessage(errorCode + "-" + errorMessage);
         });
     } else {
       signInWithEmailAndPassword(
@@ -85,98 +74,67 @@ const Login = () => {
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
-          setErrorMessage(errorMessage);
+          setAlertMessage(errorCode + "-" + errorMessage);
         });
     }
+  };
+
+  const toggleSignInHandler = () => {
+    setIsSignInForm(!isSignInForm);
   };
 
   return (
     <div>
       <Header />
 
-      <div className="absolute h-screen">
-        <img
-          className="h-screen w-screen object-cover sm:h-auto sm:w-auto"
-          src={BG_URL}
-          alt="logo"
-        />
+      <div>
+        <img src={BACKGROUND_IMG_URL} alt="bg-img" className="absolute" />
       </div>
 
-      <form className="w-full md:w-3/12 absolute p-12 bg-black my-36 mx-auto right-0 left-0 text-white rounded-lg bg-opacity-80">
-        <h1 className="text-3xl font-bold py-4">
+      <form
+        onSubmit={(e) => e.preventDefault()}
+        className="absolute bg-black w-3/12 mx-auto left-0 right-0 p-12 mt-36 text-white rounded-lg opacity-80"
+      >
+        <h1 className="font-bold text-4xl p-2 m-2 ">
           {isSignInForm ? "Sign In" : "Sign Up"}
         </h1>
         {!isSignInForm && (
           <input
-            required
             ref={name}
             type="text"
             placeholder="Full Name"
-            className="my-4 p-4 w-full bg-gray-700"
+            className="p-4 my-3 w-full  rounded-lg bg-gray-800 "
           />
         )}
         <input
-          required
           ref={email}
-          type="email"
-          placeholder="Email"
-          className="my-4 p-4 w-full bg-gray-700"
+          type="text"
+          placeholder="Email address"
+          className="p-4 my-3  w-full rounded-lg  bg-gray-800"
         />
-
-        <label className="flex relative">
-          <input
-            required
-            ref={password}
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            className="my-4 p-4 w-full bg-gray-700"
-          />
-          <span
-            className="absolute right-3 top-[34px] cursor-pointer"
-            onClick={showPasswordHandler}
-          >
-            {showPassword ? (
-              <AiOutlineEye fontSize={24} fill="#AFB2BF" />
-            ) : (
-              <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
-            )}
-          </span>
-        </label>
-        {!isSignInForm && (
-          <label className="flex relative">
-            <input
-              required
-              ref={confirmPassword}
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm Password"
-              className="my-4 p-4 w-full bg-gray-700"
-            />
-            <span
-              className="absolute right-3 top-[34px] cursor-pointer"
-              onClick={showConfirmPasswordHandler}
-            >
-              {showConfirmPassword ? (
-                <AiOutlineEye fontSize={24} fill="#AFB2BF" />
-              ) : (
-                <AiOutlineEyeInvisible fontSize={24} fill="#AFB2BF" />
-              )}
-            </span>
-          </label>
-        )}
-        <p className="text-red-500 font-bold">{erroMessage}</p>
+        <input
+          ref={password}
+          type="password"
+          placeholder="Password"
+          className="p-4 my-3 w-full  rounded-lg bg-gray-800 "
+        />
+        <p className="font-bold text-red-700 text-xl">{alertMessage}</p>
         <button
-          className="bg-red-700 p-4 my-6 w-full rounded-lg"
-          onClick={handleButtonClick}
+          className="bg-red-700 p-4 my-5 w-full rounded-lg "
+          onClick={handleClickValidation}
         >
           {isSignInForm ? "Sign In" : "Sign Up"}
         </button>
-
-        <p className="py-4 cursor-pointer" onClick={signInHandler}>
+        <p className="py-4 cursor-pointer" onClick={toggleSignInHandler}>
           {isSignInForm
-            ? "New to Netflix? Sign Up Now"
-            : "Already Registred? Sign In Now"}
+            ? " New to Netflix? Sign Up Now"
+            : "Already member? Sign In Now"}
         </p>
       </form>
+
+      <div>
+        <Fotter />
+      </div>
     </div>
   );
 };

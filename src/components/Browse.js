@@ -1,36 +1,34 @@
-import Header from "./Header";
-import useNowPlayingMovies from "../hooks/useNowPlayingMovies";
-import MainContainer from "./MainContainer";
-import SecondaryContainer from "./SecondaryContainer";
-import usePopularMovies from "../hooks/usePopularMovies";
-import useTopRatedMovies from "../hooks/useTopRatedMovies";
-import useUpcomingMovies from "../hooks/useUpcomingMovies";
-import GptSearch from "./GptSearch";
-import { useSelector } from "react-redux";
-import { Outlet } from "react-router-dom";
+
+import Header from './Header'
+import useNowPlayingMovies from "../hooks/useNowPlayingMovie"
+import MainContainer from './MainContainer'
+import SecondaryContainer from './SecondaryContainer'
+import usePopularMovie from '../hooks/usePopularMovie'
+import useTrendingMovies from '../hooks/useTrendingMovies'
+import useUpCommingMovies from '../hooks/useUpCommingMovies'
+import useBiographyMovies from '../hooks/useBiographyMovies'
+import SearchGPT from './SearchGPT'
+import {useSelector} from 'react-redux'
+
 
 const Browse = () => {
-  const showGptSearch = useSelector((store) => store.gpt.showGptSearch);
-  const isDescription = useSelector((store)=> store.movies.isDescription);
-  useNowPlayingMovies();
-  usePopularMovies();
-  useTopRatedMovies();
-  useUpcomingMovies();
-
+  const showSearchGpt = useSelector(store => store.gpt.showSearchGpt) 
+ useNowPlayingMovies();
+ usePopularMovie();
+ useTrendingMovies();
+ useUpCommingMovies();
+ useBiographyMovies();
   return (
     <div>
       <Header />
-     
-      {isDescription? ( <Outlet/>) : (showGptSearch ? (
-        <GptSearch />
-      ) : (
-        <div>
-          <MainContainer />
-          <SecondaryContainer />
-        </div>
-      ))}
+  {showSearchGpt ?(<SearchGPT />):
+  (<>
+    <MainContainer />
+  <SecondaryContainer />
+  </>
+  )}
     </div>
-  );
-};
+  )
+}
 
-export default Browse;
+export default Browse

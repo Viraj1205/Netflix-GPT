@@ -1,36 +1,26 @@
-import { createSlice } from "@reduxjs/toolkit";
-
+import {createSlice} from '@reduxjs/toolkit'
 const gptSlice = createSlice({
-  name: "gpt",
-  initialState: {
-    showGptSearch: false,
-    movieResults: null,
-    movieNames: null,
-    isLoading: null,
-  },
-  reducers: {
-    toggleGptSearchView: (state, action) => {
-      state.showGptSearch = !state.showGptSearch;
-    },
-    setGptSearchView: (state, action) => {
-      state.showGptSearch = false;
-    },
-    addGptMovieResult: (state, action) => {
-      const { movieNames, movieResults } = action.payload;
-      state.movieNames = movieNames;
-      state.movieResults = movieResults;
+    name:"gpt",
+    initialState:{
+        showSearchGpt: false,
+        gptMovies:null,
+        movieNames:null,
+        movieResults:null,
     },
 
-    clearGptMovieResult: (state, action) => {
-      state.movieNames = null;
-      state.movieResults = null;
-    },
-    toggleIsLoading: (state, action) => {
-      state.isLoading = action.payload;
-    },
-  },
-});
+    reducers:{
+        toggleSearchGpt:(state) =>{
+            state.showSearchGpt = !state.showSearchGpt;
+        }, 
+        addGptMovies:(state, action) =>{
+            const {movieNames, movieResults} = action.payload;
+            state.movieNames = movieNames;
+            state.movieResults = movieResults;
+        }
+        
+    }
 
-export const { toggleGptSearchView, addGptMovieResult, clearGptMovieResult,toggleIsLoading, setGptSearchView } =
-  gptSlice.actions;
-export default gptSlice.reducer;
+})
+
+export const {toggleSearchGpt, addGptMovies} = gptSlice.actions;
+export default  gptSlice.reducer
